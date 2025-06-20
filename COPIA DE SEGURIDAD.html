@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Calificaciones - INEMOF</title>
+    <!-- Librerías para exportación -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #0f2443 0%, #2c5aa0 25%, #ffffff 50%, #e63946 75%, #8b1538 100%);
+            background-attachment: fixed;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        /* Escudo de fondo sutil */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 500px;
+            height: 500px;
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjUwMCIgdmlld0JveD0iMCAwIDUwMCA1MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxkZWZzPgo8bGluZWFyR3JhZGllbnQgaWQ9InNoaWVsZCIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+CjxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiMwZjI0NDMiLz4KPHN0b3Agb2Zmc2V0PSIzMCUiIHN0b3AtY29sb3I9IiMyYzVhYTAiLz4KPHN0b3Agb2Zmc2V0PSI1MCUiIHN0b3AtY29sb3I9IiNmZmZmZmYiLz4KPHN0b3Agb2Zmc2V0PSI3MCUiIHN0b3AtY29sb3I9IiNlNjM5NDYiLz4KPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjOGIxNTM4Ii8+CjwvbGluZWFyR3JhZGllbnQ+CjwvZGVmcz4KPCEtLSBFc2N1ZG8gLS0+CjxwYXRoIGQ9Ik0yNTAgMzBMMzUwIDgwVjMyMEMzNDAgMzgwIDMwMCA0MjAgMjUwIDQ1MEMyMDAgNDIwIDE2MCAzODAgMTUwIDMyMFY4MEwyNTAgMzBaIiBmaWxsPSJ1cmwoI3NoaWVsZCkiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIzIiBvcGFjaXR5PSIwLjAzIi8+CjwhLS0gTGlicm8gLS0+CjxyZWN0IHg9IjE4MCIgeT0iMTIwIiB3aWR0aD0iMTQwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2ZmZiIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjIiIG9wYWNpdHk9IjAuMDMiLz4KPGxpbmUgeDE9IjE5MCIgeTE9IjE0MCIgeDI9IjMxMCIgeTI9IjE0MCIgc3Ryb2tlPSIjMDAwIiBvcGFjaXR5PSIwLjAzIi8+CjxsaW5lIHgxPSIxOTAiIHkxPSIxNjAiIHgyPSIzMDAiIHkyPSIxNjAiIHN0cm9rZT0iIzAwMCIgb3BhY2l0eT0iMC4wMyIvPgo8bGluZSB4MT0iMTkwIiB5MT0iMTgwIiB4Mj0iMzAwIiB5Mj0iMTgwIiBzdHJva2U9IiMwMDAiIG9wYWNpdHk9IjAuMDMiLz4KPGxpbmUgeDE9IjE5MCIgeTE9IjIwMCIgeDI9IjI4MCIgeTI9IjIwMCIgc3Ryb2tlPSIjMDAwIiBvcGFjaXR5PSIwLjAzIi8+CjwhLS0gUGx1bWEgLS0+CjxwYXRoIGQ9Ik0zMjAgMjgwTDM2MCAyNjBMMzgwIDMwMEwzNDAgMzIwWiIgZmlsbD0iI2U2Mzk0NiIgb3BhY2l0eT0iMC4wMyIvPgo8L3N2Zz4K');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Sistema de Login */
+        .login-container {
+            max-width: 450px;
+            margin: 80px auto;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(15, 36, 67, 0.4);
+            border: 3px solid #0f2443;
+            backdrop-filter: blur(10px);
+        }
+
+        .login-form h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #0f2443;
+            font-weight: bold;
+            font-size: 28px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #0f2443;
+            font-size: 16px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #2c5aa0;
+            border-radius: 10px;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            border-color: #e63946;
+            outline: none;
+            box-shadow: 0 0 10px rgba(230, 57, 70, 0.3);
+        }
+
+        .btn {
+            padding: 15px 30px;
+            margin: 8px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0f2443, #2c5aa0);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #e63946, #8b1538);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #17a2b8, #6f42c1);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffc107, #fd7e14);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+        }
+
+        /* Encabezado Principal Rediseñado */
+        .main-header {
+            background: linear-gradient(135deg, rgba(15, 36, 67, 0.95), rgba(44, 90, 160, 0.95));
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 15px 35px rgba(15, 36, 67, 0.3);
+            border: 3px solid #0f2443;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .main-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .school-logo {
+            width: 100px;
+            height: 100px;
+            background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxkZWZzPgo8bGluZWFyR3JhZGllbnQgaWQ9InNoaWVsZCIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+CjxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiMwZjI0NDMiLz4KPHN0b3Agb2Zmc2V0PSIzMCUiIHN0b3AtY29sb3I9IiMyYzVhYTAiLz4KPHN0b3Agb2Zmc2V0PSI1MCUiIHN0b3AtY29sb3I9IiNmZmZmZmYiLz4KPHN0b3Agb2Zmc2V0PSI3MCUiIHN0b3AtY29sb3I9IiNlNjM5NDYiLz4KPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjOGIxNTM4Ii8+CjwvbGluZWFyR3JhZGllbnQ+CjwvZGVmcz4KPCEtLSBFc2N1ZG8gLS0+CjxwYXRoIGQ9Ik01MCA1TDgwIDIwVjY1Qzc1IDc1IDYyIDg1IDUwIDkwQzM4IDg1IDI1IDc1IDIwIDY1VjIwTDUwIDVaIiBmaWxsPSJ1cmwoI3NoaWVsZCkiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLXdpZHRoPSIyIi8+CjwhLS0gTGlicm8gLS0+CjxyZWN0IHg9IjMwIiB5PSIyNSIgd2lkdGg9IjQwIiBoZWlnaHQ9IjI1IiBmaWxsPSIjZmZmIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMSIvPgo8bGluZSB4MT0iMzUiIHkxPSIzMCIgeDI9IjY1IiB5Mj0iMzAiIHN0cm9rZT0iIzAwMCIvPgo8bGluZSB4MT0iMzUiIHkxPSIzNSIgeDI9IjYwIiB5Mj0iMzUiIHN0cm9rZT0iIzAwMCIvPgo8bGluZSB4MT0iMzUiIHkxPSI0MCIgeDI9IjYwIiB5Mj0iNDAiIHN0cm9rZT0iIzAwMCIvPgo8bGluZSB4MT0iMzUiIHkxPSI0NSIgeDI9IjU1IiB5Mj0iNDUiIHN0cm9rZT0iIzAwMCIvPgo8IS0tIFBsdW1hIC0tPgo8cGF0aCBkPSJNNjAgNjBMNzAgNTVMNzUgNjVMNjUgNzBaIiBmaWxsPSIjZTYzOTQ2Ii8+Cjx0ZXh0IHg9IjUwIiB5PSI3NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSI4IiBmaWxsPSIjZmZmIiBmb250LWZhbWlseT0iQXJpYWwiPklORU1PRjwvdGV4dD4KPC9zdmc+') center/contain no-repeat;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .header-info h1 {
+            font-size: 28px;
+            margin: 0 0 10px 0;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header-info p {
+            margin: 5px 0;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .header-right {
+            text-align: right;
+        }
+
+        .academic-info {
+            background: rgba(255,255,255,0.15);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .academic-info h3 {
+            margin: 0 0 10px 0;
+            font-size: 18px;
+        }
+
+        /* Información del usuario */
+        .user-info {
+            background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.85));
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 8px 25px rgba(15, 36, 67, 0.2);
+            border-left: 6px solid #e63946;
+        }
+
+        .user-info span {
+            color: #0f2443;
+            font-weight: bold;
+        }
+
+        /* Controles mejorados */
+        .controls {
+            background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.85));
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 25px rgba(15, 36, 67, 0.2);
+            border: 2px solid #0f2443;
+        }
+
+        .controls-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .controls select {
+            padding: 12px 20px;
+            border: 2px solid #0f2443;
+            border-radius: 10px;
+            font-size: 16px;
+            background: white;
+            color: #0f2443;
+            font-weight: bold;
+            min-width: 150px;
+        }
+
+        .export-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            padding-top: 20px;
+            border-top: 2px solid #e9ecef;
+        }
+
+        /* Tabla mejorada */
+        .grade-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 15px 35px rgba(15, 36, 67, 0.3);
+            border-radius: 15px;
+            overflow: hidden;
+            font-size: 11px;
+            border: 3px solid #0f2443;
+        }
+
+        .grade-table th {
+            background: linear-gradient(135deg, #0f2443, #2c5aa0);
+            color: white;
+            padding: 15px 8px;
+            text-align: center;
+            font-size: 10px;
+            border: 1px solid #ffffff;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .grade-table td {
+            padding: 10px 6px;
+            border: 1px solid #dee2e6;
+            text-align: center;
+            font-size: 11px;
+            background: rgba(255, 255, 255, 0.95);
+            transition: all 0.3s ease;
+        }
+
+        .grade-table tr:hover {
+            background: rgba(44, 90, 160, 0.1);
+        }
+
+        .student-name {
+            text-align: left !important;
+            font-weight: bold;
+            background: linear-gradient(135deg, #f8f9ff, #e8f0ff) !important;
+            min-width: 200px;
+            color: #0f2443;
+            border-left: 4px solid #e63946 !important;
+        }
+
+        .student-name input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            font-weight: bold;
+            color: #0f2443;
+            padding: 6px;
+            text-align: left;
+            font-size: 12px;
+        }
+
+        .grade-input {
+            width: 50px;
+            border: 2px solid transparent;
+            background: transparent;
+            text-align: center;
+            font-size: 12px;
+            padding: 6px;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .grade-input:focus {
+            background: #e3f2fd;
+            border-color: #0f2443;
+            outline: none;
+            box-shadow: 0 0 10px rgba(15, 36, 67, 0.3);
+        }
+
+        .grade-input:hover {
+            background: #f0f8ff;
+        }
+
+        .performance-cell {
+            font-weight: bold;
+            font-size: 10px;
+            color: #0f2443;
+        }
+
+        .average-cell {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7) !important;
+            font-weight: bold;
+            color: #e63946;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .rank-cell {
+            font-weight: bold;
+            font-size: 12px;
+            text-align: center;
+            border-radius: 8px;
+            padding: 8px 4px !important;
+        }
+
+        .rank-1 { background: linear-gradient(135deg, #ffd700, #ffed4e) !important; color: #b8860b; }
+        .rank-2 { background: linear-gradient(135deg, #c0c0c0, #e8e8e8) !important; color: #666; }
+        .rank-3 { background: linear-gradient(135deg, #cd7f32, #d4905a) !important; color: #8b4513; }
+        .rank-other { background: linear-gradient(135deg, #e8f5e8, #c8e6c9) !important; color: #2e7d32; }
+
+        /* Footer mejorado */
+        .footer-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .footer-box {
+            background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.85));
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(15, 36, 67, 0.2);
+            border-left: 5px solid #e63946;
+        }
+
+        .footer-box h4 {
+            color: #0f2443;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .footer-box p {
+            margin: 10px 0;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Responsivo */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 20px;
+            }
+            
+            .header-left {
+                flex-direction: column;
+            }
+            
+            .grade-table {
+                font-size: 9px;
+            }
+            
+            .grade-table th, .grade-table td {
+                padding: 6px 3px;
+            }
+            
+            .grade-input {
+                width: 45px;
+            }
+
+            .controls-row, .export-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+
+        /* Efectos de carga */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(15, 36, 67, 0.3);
+            border-radius: 50%;
+            border-top-color: #0f2443;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sistema de Login -->
+    <div id="loginSystem" class="login-container">
+        <div class="login-form">
+            <h2 id="formTitle">🏫 SISTEMA INEMOF</h2>
+            <h3 style="text-align: center; color: #e63946; margin-bottom: 25px;">Gestión de Calificaciones</h3>
+            <form id="authForm">
+                <div class="form-group" id="nameGroup" style="display: none;">
+                    <label for="fullName">👨‍🏫 Nombre Completo:</label>
+                    <input type="text" id="fullName" placeholder="Ingrese su nombre completo">
+                </div>
+                <div class="form-group">
+                    <label for="username">👤 Usuario:</label>
+                    <input type="text" id="username" placeholder="Ingrese su usuario" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">🔒 Contraseña:</label>
+                    <input type="password" id="password" placeholder="Ingrese su contraseña" required>
+                </div>
+                <button type="submit" class="btn btn-primary" id="authBtn">Iniciar Sesión</button>
+                <button type="button" class="btn btn-secondary" id="toggleAuth" style="width: 100%; margin-top: 15px;">
+                    ¿No tiene cuenta? Registrarse
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Aplicación Principal -->
+    <div id="mainApp" class="hidden">
+        <!-- Encabezado Principal Rediseñado -->
+        <div class="main-header">
+            <div class="header-content">
+                <div class="header-left">
+                    <div class="school-logo"></div>
+                    <div class="header-info">
+                        <h1>INSTITUCIÓN EDUCATIVA MORINDÓ FLORIDA</h1>
+                        <p><strong>Con reconocimiento de Carácter oficial según la Resolución N.° 000546 de diciembre 04 de 2008</strong></p>
+                        <p>DANE N° 223574000211 – NIT 900881826-8 – Registro PEI No. 0170-2022</p>
+                        <p>📍 Vereda Morindó Florida - Puerto Escondido - Córdoba</p>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <div class="academic-info">
+                        <h3>📊 AÑO LECTIVO 2025</h3>
+                        <p><strong>🎓 Grado:</strong> <span id="headerGrade">7°</span></p>
+                        <p><strong>📅 Período:</strong> <span id="headerPeriod">I</span></p>
+                        <p><strong>👨‍🏫 Docente:</strong> <span id="headerTeacher"></span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Información del usuario -->
+        <div class="user-info">
+            <div>
+                <strong>👨‍🏫 Docente:</strong> <span id="currentUser"></span> | 
+                <strong>📅 Conectado:</strong> <span id="currentDateTime"></span> | 
+                <strong>🎓 Grado:</strong> <span id="currentGrade">7°</span> | 
+                <strong>📊 Período:</strong> <span id="selectedPeriod">I</span>
+            </div>
+            <button class="btn btn-secondary" onclick="logout()">🚪 Cerrar Sesión</button>
+        </div>
+
+        <!-- Controles -->
+        <div class="controls">
+            <div class="controls-row">
+                <select id="gradeSelect">
+                    <option value="1">🎓 Grado 1°</option>
+                    <option value="2">🎓 Grado 2°</option>
+                    <option value="3">🎓 Grado 3°</option>
+                    <option value="4">🎓 Grado 4°</option>
+                    <option value="5">🎓 Grado 5°</option>
+                    <option value="6">🎓 Grado 6°</option>
+                    <option value="7">🎓 Grado 7°</option>
+                    <option value="8">🎓 Grado 8°</option>
+                    <option value="9">🎓 Grado 9°</option>
+                    <option value="10">🎓 Grado 10°</option>
+                    <option value="11">🎓 Grado 11°</option>
+                </select>
+                
+                <select id="periodSelect">
+                    <option value="I">📊 Período I</option>
+                    <option value="II">📊 Período II</option>
+                    <option value="III">📊 Período III</option>
+                    <option value="IV">📊 Período IV</option>
+                </select>
+                
+                <button class="btn btn-primary" onclick="addStudentRow()">➕ Agregar Estudiante</button>
+                <button class="btn btn-secondary" onclick="saveGrades()">💾 Guardar Calificaciones</button>
+            </div>
+
+            <div class="export-controls">
+                <button class="btn btn-success" onclick="exportToPDF()">📄 Exportar PDF</button>
+                <button class="btn btn-info" onclick="exportToExcel()">📊 Exportar Excel</button>
+                <button class="btn btn-warning" onclick="exportToWord()">📝 Exportar Word</button>
+                <button class="btn btn-info" onclick="exportToImage()">🖼️ Exportar Imagen</button>
+                <button class="btn btn-secondary" onclick="printDirect()">🖨️ Imprimir Directamente</button>
+            </div>
+        </div>
+
+        <!-- Tabla de calificaciones -->
+        <div id="printableArea">
+            <table class="grade-table" id="gradesTable">
+                <thead>
+                    <tr>
+                        <th rowspan="2">N°</th>
+                        <th rowspan="2">APELLIDOS Y NOMBRES</th>
+                        <th colspan="2">Religión</th>
+                        <th colspan="2">Matemáticas</th>
+                        <th colspan="2">C. Naturales</th>
+                        <th colspan="2">Lengua Cast.</th>
+                        <th colspan="2">C. Sociales</th>
+                        <th colspan="2">Inglés</th>
+                        <th colspan="2">Ed. Física</th>
+                        <th colspan="2">Ed. Ética</th>
+                        <th colspan="2">Informática</th>
+                        <th rowspan="2">PROMEDIO</th>
+                        <th rowspan="2">PUESTO</th>
+                    </tr>
+                    <tr>
+                        <th>Nota</th><th>Desempeño</th>
+                        <th>Nota</th><th>Desempeño</th>
+                        <th>Nota</th><th>Desempeño</th>
+                        <th>Nota</th><th>Desempeño</th>
+                        <th>Nota</th><th>Desempeño</th>
+                        <th>Nota</th><th>Desempeño</th>
+                        <th>Nota</th><th>Desempeño</th>
+                        <th>Nota</th><th>Desempeño</th>
+                        <th>Nota</th><th>Desempeño</th>
+                    </tr>
+                </thead>
+                <tbody id="gradesTableBody">
+                    <!-- Las 15 filas se generarán automáticamente -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Información adicional -->
+        <div class="footer-info">
+            <div class="footer-box">
+                <h4>👨‍🏫 DOCENTE</h4>
+                <p><strong>Nombre:</strong> <span id="teacherName"></span></p>
+                <p><strong>Fecha:</strong> <span id="currentDate"></span></p>
+                <div style="border-top: 2px solid #0f2443; padding-top: 20px; margin-top: 20px; text-align: center;">
+                    <strong>PLANILLA DE NOTAS FINALES</strong>
+                </div>
+            </div>
+            
+            <div class="footer-box">
+                <h4>📋 INFORMACIÓN ACADÉMICA</h4>
+                <p><strong>📅 AÑO LECTIVO:</strong> 2025</p>
+                <p><strong>🎓 GRADO:</strong> <span id="footerGrade">7°</span></p>
+                <p><strong>🏫 SEDE:</strong> Principal</p>
+                <p><strong>📊 PERÍODO:</strong> <span id="footerPeriod">I</span></p>
+                <p><strong>📍 UBICACIÓN:</strong> Vereda Morindó Florida</p>
+            </div>
+            
+            <div class="footer-box">
+                <h4>📊 CONVENCIONES</h4>
+                <p><strong style="color: #e63946;">DESEMPEÑO BAJO (BJ):</strong> 1.0 – 3.4</p>
+                <p><strong style="color: #fd7e14;">DESEMPEÑO BÁSICO (BS):</strong> 3.5 – 3.9</p>
+                <p><strong style="color: #0f2443;">DESEMPEÑO ALTO (AT):</strong> 4.0 – 4.4</p>
+                <p><strong style="color: #28a745;">DESEMPEÑO SUPERIOR (SP):</strong> 4.5 – 5.0</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let currentUser = null;
+        let isLoginMode = true;
+        let studentCount = 0;
+
+        // Inicializar la aplicación
+        window.onload = function() {
+            checkLoginStatus();
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+        };
+
+        function updateDateTime() {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            document.getElementById('currentDateTime').textContent = dateStr;
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('es-ES');
+        }
+
+        function checkLoginStatus() {
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                showMainApp();
+            } else {
+                showLoginSystem();
+            }
+        }
+
+        function showLoginSystem() {
+            document.getElementById('loginSystem').classList.remove('hidden');
+            document.getElementById('mainApp').classList.add('hidden');
+        }
+
+        function showMainApp() {
+            document.getElementById('loginSystem').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            document.getElementById('currentUser').textContent = currentUser.fullName;
+            document.getElementById('teacherName').textContent = currentUser.fullName;
+            document.getElementById('headerTeacher').textContent = currentUser.fullName;
+            generateInitialRows();
+        }
+
+        // Sistema de autenticación
+        document.getElementById('toggleAuth').addEventListener('click', function() {
+            isLoginMode = !isLoginMode;
+            if (isLoginMode) {
+                document.querySelector('h3').textContent = 'Gestión de Calificaciones';
+                document.getElementById('authBtn').textContent = 'Iniciar Sesión';
+                document.getElementById('toggleAuth').textContent = '¿No tiene cuenta? Registrarse';
+                document.getElementById('nameGroup').style.display = 'none';
+            } else {
+                document.querySelector('h3').textContent = 'Registro de Usuario';
+                document.getElementById('authBtn').textContent = 'Registrarse';
+                document.getElementById('toggleAuth').textContent = '¿Ya tiene cuenta? Iniciar Sesión';
+                document.getElementById('nameGroup').style.display = 'block';
+            }
+        });
+
+        document.getElementById('authForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const fullName = document.getElementById('fullName').value;
+
+            if (isLoginMode) {
+                const users = JSON.parse(localStorage.getItem('users') || '[]');
+                const user = users.find(u => u.username === username && u.password === password);
+                
+                if (user) {
+                    currentUser = user;
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    showMainApp();
+                } else {
+                    alert('❌ Usuario o contraseña incorrectos');
+                }
+            } else {
+                const users = JSON.parse(localStorage.getItem('users') || '[]');
+                
+                if (users.find(u => u.username === username)) {
+                    alert('❌ El usuario ya existe');
+                    return;
+                }
+                
+                if (!fullName.trim()) {
+                    alert('❌ Por favor ingrese su nombre completo');
+                    return;
+                }
+                
+                const newUser = {
+                    username: username,
+                    password: password,
+                    fullName: fullName.trim()
+                };
+                
+                users.push(newUser);
+                localStorage.setItem('users', JSON.stringify(users));
+                alert('✅ Usuario registrado exitosamente');
+                document.getElementById('toggleAuth').click();
+            }
+        });
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            currentUser = null;
+            showLoginSystem();
+            document.getElementById('authForm').reset();
+        }
+
+        // Generar 15 filas iniciales
+        function generateInitialRows() {
+            const tbody = document.getElementById('gradesTableBody');
+            tbody.innerHTML = '';
+            
+            for (let i = 1; i <= 15; i++) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${i}</td>
+                    <td class="student-name">
+                        <input type="text" placeholder="APELLIDOS Y NOMBRES" onchange="updateStudentName(this)" oninput="calculateRankings()">
+                    </td>
+                    ${generateGradeCells()}
+                    <td class="average-cell" id="avg_${i}">0.0</td>
+                    <td class="rank-cell rank-other" id="rank_${i}">-</td>
+                `;
+                tbody.appendChild(row);
+            }
+            studentCount = 15;
+        }
+
+        function addStudentRow() {
+            studentCount++;
+            const tbody = document.getElementById('gradesTableBody');
+            
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${studentCount}</td>
+                <td class="student-name">
+                    <input type="text" placeholder="APELLIDOS Y NOMBRES" onchange="updateStudentName(this)" oninput="calculateRankings()">
+                </td>
+                ${generateGradeCells()}
+                <td class="average-cell" id="avg_${studentCount}">0.0</td>
+                <td class="rank-cell rank-other" id="rank_${studentCount}">-</td>
+            `;
+            tbody.appendChild(row);
+            
+            alert('✅ Nueva fila de estudiante agregada');
+        }
+
+        function generateGradeCells() {
+            let cells = '';
+            for (let i = 0; i < 9; i++) {
+                cells += `
+                    <td><input type="number" class="grade-input" step="0.1" min="1.0" max="5.0" oninput="updateGrade(this)"></td>
+                    <td class="performance-cell"></td>
+                `;
+            }
+            return cells;
+        }
+
+        function updateStudentName(input) {
+            if (input.value.trim() === '') {
+                setTimeout(() => calculateRankings(), 100);
+            }
+        }
+
+        function updateGrade(input) {
+            const grade = parseFloat(input.value);
+            const performanceCell = input.parentElement.nextElementSibling;
+            
+            if (grade && grade >= 1.0 && grade <= 5.0) {
+                performanceCell.textContent = getPerformance(grade);
+                updateAverage(input);
+            } else {
+                performanceCell.textContent = "";
+                updateAverage(input);
+            }
+        }
+
+        function getPerformance(grade) {
+            if (grade >= 4.5) return "SP";
+            if (grade >= 4.0) return "AT";
+            if (grade >= 3.5) return "BS";
+            if (grade >= 1.0) return "BJ";
+            return "";
+        }
+
+        function updateAverage(input) {
+            const row = input.closest('tr');
+            const gradeInputs = row.querySelectorAll('.grade-input');
+            const averageCell = row.querySelector('.average-cell');
+            
+            let total = 0;
+            let count = 0;
+            
+            gradeInputs.forEach(input => {
+                const value = parseFloat(input.value);
+                if (value && value >= 1.0 && value <= 5.0) {
+                    total += value;
+                    count++;
+                }
+            });
+            
+            if (count > 0) {
+                const average = (total / count).toFixed(1);
+                averageCell.textContent = average;
+            } else {
+                averageCell.textContent = "0.0";
+            }
+            
+            // Calcular rankings automáticamente
+            setTimeout(calculateRankings, 100);
+        }
+
+        // Calcular rankings automáticamente
+        function calculateRankings() {
+            const rows = Array.from(document.querySelectorAll('#gradesTableBody tr'));
+            
+            const studentsData = rows.map((row, index) => {
+                const nameInput = row.querySelector('.student-name input');
+                const averageCell = row.querySelector('.average-cell');
+                const average = parseFloat(averageCell.textContent) || 0;
+                
+                return { 
+                    row, 
+                    average, 
+                    hasName: nameInput.value.trim() !== '',
+                    originalIndex: index 
+                };
+            }).filter(student => student.hasName && student.average > 0);
+
+            // Ordenar por promedio (mayor a menor)
+            studentsData.sort((a, b) => b.average - a.average);
+
+            // Resetear todos los puestos
+            rows.forEach(row => {
+                const rankCell = row.querySelector('.rank-cell');
+                rankCell.textContent = '-';
+                rankCell.className = 'rank-cell rank-other';
+            });
+
+            // Asignar puestos solo a estudiantes con nombre y promedio
+            studentsData.forEach((student, index) => {
+                const rankCell = student.row.querySelector('.rank-cell');
+                const position = index + 1;
+                rankCell.textContent = `${position}°`;
+                
+                // Aplicar clases de estilo según el puesto
+                if (position === 1) {
+                    rankCell.className = 'rank-cell rank-1';
+                } else if (position === 2) {
+                    rankCell.className = 'rank-cell rank-2';
+                } else if (position === 3) {
+                    rankCell.className = 'rank-cell rank-3';
+                } else {
+                    rankCell.className = 'rank-cell rank-other';
+                }
+            });
+        }
+
+        // Funciones de guardado
+        function saveGrades() {
+            const grade = document.getElementById('gradeSelect').value;
+            const period = document.getElementById('periodSelect').value;
+            const gradesData = [];
+            
+            const rows = Array.from(document.querySelectorAll('#gradesTableBody tr'));
+            
+            rows.forEach((row, index) => {
+                const studentNameInput = row.querySelector('.student-name input');
+                const gradeInputs = row.querySelectorAll('.grade-input');
+                const averageCell = row.querySelector('.average-cell');
+                const rankCell = row.querySelector('.rank-cell');
+                
+                if (studentNameInput && studentNameInput.value.trim()) {
+                    const grades = Array.from(gradeInputs).map(input => input.value);
+                    const average = averageCell.textContent;
+                    const rank = rankCell.textContent;
+                    
+                    gradesData.push({
+                        student: studentNameInput.value.trim(),
+                        grades: grades,
+                        average: average,
+                        rank: rank
+                    });
+                }
+            });
+            
+            localStorage.setItem(`grades_${grade}_${period}`, JSON.stringify(gradesData));
+            alert(`✅ Calificaciones guardadas exitosamente para Grado ${grade}° - Período ${period}`);
+        }
+
+        // Funciones de exportación
+        async function exportToPDF() {
+            const { jsPDF } = window.jspdf;
+            const element = document.getElementById('printableArea');
+            
+            try {
+                const canvas = await html2canvas(element, {
+                    scale: 2,
+                    logging: false,
+                    allowTaint: true,
+                    useCORS: true
+                });
+                
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF('l', 'mm', 'a4');
+                
+                const imgWidth = 280;
+                const pageHeight = 210;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                let heightLeft = imgHeight;
+                
+                let position = 0;
+                
+                pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+                
+                while (heightLeft >= 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+                
+                const grade = document.getElementById('gradeSelect').value;
+                const period = document.getElementById('periodSelect').value;
+                pdf.save(`INEMOF_Calificaciones_Grado_${grade}_Periodo_${period}.pdf`);
+                
+                alert('📄 Archivo PDF exportado exitosamente');
+            } catch (error) {
+                alert('❌ Error al exportar PDF: ' + error.message);
+            }
+        }
+
+        function exportToExcel() {
+            const table = document.getElementById('gradesTable');
+            const wb = XLSX.utils.table_to_book(table, {sheet: "Calificaciones"});
+            
+            const grade = document.getElementById('gradeSelect').value;
+            const period = document.getElementById('periodSelect').value;
+            XLSX.writeFile(wb, `INEMOF_Calificaciones_Grado_${grade}_Periodo_${period}.xlsx`);
+            
+            alert('📊 Archivo Excel exportado exitosamente');
+        }
+
+        function exportToWord() {
+            const grade = document.getElementById('gradeSelect').value;
+            const period = document.getElementById('periodSelect').value;
+            
+            let htmlContent = `
+                <html>
+                    <head>
+                        <meta charset="UTF-8">
+                        <style>
+                            body { font-family: Arial, sans-serif; }
+                            table { border-collapse: collapse; width: 100%; }
+                            th, td { border: 1px solid black; padding: 8px; text-align: center; font-size: 11px; }
+                            .header-title { text-align: center; font-weight: bold; margin-bottom: 20px; }
+                            .student-name { text-align: left; font-weight: bold; }
+                            .grade-header { background-color: #0f2443; color: white; font-weight: bold; }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="header-title">
+                            <h2>INSTITUCIÓN EDUCATIVA MORINDÓ FLORIDA</h2>
+                            <p>GRADO: ${grade}° - PERÍODO: ${period} - AÑO LECTIVO: 2025</p>
+                            <p>DOCENTE: ${currentUser.fullName}</p>
+                        </div>
+                        ${document.getElementById('gradesTable').outerHTML}
+                    </body>
+                </html>
+            `;
+            
+            const blob = new Blob([htmlContent], { type: 'application/msword' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `INEMOF_Calificaciones_Grado_${grade}_Periodo_${period}.doc`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            alert('📝 Archivo Word exportado exitosamente');
+        }
+
+        async function exportToImage() {
+            const element = document.getElementById('printableArea');
+            
+            try {
+                const canvas = await html2canvas(element, {
+                    scale: 3,
+                    logging: false,
+                    allowTaint: true,
+                    useCORS: true,
+                    backgroundColor: 'white'
+                });
+                
+                const link = document.createElement('a');
+                link.download = `INEMOF_Calificaciones_${new Date().getTime()}.png`;
+                link.href = canvas.toDataURL();
+                link.click();
+                
+                alert('🖼️ Imagen exportada exitosamente');
+            } catch (error) {
+                alert('❌ Error al exportar imagen: ' + error.message);
+            }
+        }
+
+        function printDirect() {
+            const printWindow = window.open('', '_blank');
+            const grade = document.getElementById('gradeSelect').value;
+            const period = document.getElementById('periodSelect').value;
+            
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>Calificaciones - Grado ${grade}° Período ${period}</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; margin: 20px; }
+                            table { border-collapse: collapse; width: 100%; }
+                            th, td { border: 1px solid black; padding: 6px; text-align: center; font-size: 10px; }
+                            .header-title { text-align: center; margin-bottom: 20px; }
+                            .student-name { text-align: left; font-weight: bold; }
+                            th { background-color: #0f2443; color: white; }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="header-title">
+                            <h2>INSTITUCIÓN EDUCATIVA MORINDÓ FLORIDA</h2>
+                            <p>GRADO: ${grade}° - PERÍODO: ${period} - AÑO LECTIVO: 2025</p>
+                            <p>DOCENTE: ${currentUser.fullName}</p>
+                        </div>
+                        ${document.getElementById('printableArea').innerHTML}
+                    </body>
+                </html>
+            `);
+            
+            printWindow.document.close();
+            printWindow.focus();
+            
+            setTimeout(() => {
+                printWindow.print();
+                printWindow.close();
+            }, 1000);
+        }
+
+        // Event listeners
+        document.getElementById('gradeSelect').addEventListener('change', function() {
+            const grade = this.value;
+            document.getElementById('currentGrade').textContent = grade + '°';
+            document.getElementById('footerGrade').textContent = grade + '°';
+            document.getElementById('headerGrade').textContent = grade + '°';
+        });
+
+        document.getElementById('periodSelect').addEventListener('change', function() {
+            const period = this.value;
+            document.getElementById('selectedPeriod').textContent = period;
+            document.getElementById('footerPeriod').textContent = period;
+            document.getElementById('headerPeriod').textContent = period;
+        });
+    </script>
+</body>
+</html>
